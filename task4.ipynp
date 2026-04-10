@@ -1,0 +1,53 @@
+# PROJECT: AI Recommendation System
+# TASK 4: User-Item Collaborative Filtering using Matrix Factorization logic
+# DELIVERABLE: A system showing personalized recommendations
+
+import pandas as pd
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
+
+# 1. Mock Dataset: User ratings for different Movies
+# Rows = Users, Columns = Movies
+data = {
+    'Inception': [5, 4, 1, 0, 0],
+    'Interstellar': [4, 5, 2, 1, 0],
+    'The Hangover': [1, 0, 5, 4, 5],
+    'Grown Ups': [0, 1, 4, 5, 4],
+    'The Dark Knight': [5, 5, 2, 0, 1]
+}
+
+users = ['Ayush', 'User_B', 'User_C', 'User_D', 'User_E']
+df = pd.DataFrame(data, index=users)
+
+# 2. Compute Similarity Matrix using Cosine Similarity
+# It calculates how similar users are based on their ratings
+user_similarity = cosine_similarity(df)
+user_sim_df = pd.DataFrame(user_similarity, index=df.index, columns=df.index)
+
+print("--- User Similarity Matrix ---")
+print(user_sim_df.head())
+
+# 3. Recommendation Function
+def get_recommendations(user_name):
+    # Similar users dhundo
+    similar_users = user_sim_df[user_name].sort_values(ascending=False).index[1]
+    
+    # Target user ki movies aur similar user ki movies compare karo
+    target_user_movies = df.loc[user_name]
+    similar_user_movies = df.loc[similar_users]
+    
+    # Wo movies suggest karo jo similar user ne dekhi hain par target user ne nahi
+    recommendations = similar_user_movies[target_user_movies == 0].sort_values(ascending=False)
+    return recommendations.index.tolist()
+
+# 4. Results for Ayush
+print(f"\n--- Recommendations for {users[0]} ---")
+rec = get_recommendations(users[0])
+if rec:
+    for i, movie in enumerate(rec, 1):
+        print(f"{i}. Recommended: {movie}")
+else:
+    print("No new movies to recommend!")
+
+# 5. Evaluation (Mean Rating of Dataset)
+print(f"\nAverage System Rating: {df.values.mean():.2f}")
